@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from picamera2 import Picamera2
 import time
 from PIL import Image
@@ -5,6 +6,7 @@ import schedule
 import os
 import logging
 import gc
+
 
 # 로깅 설정
 logging.basicConfig(filename='/home/ldh/Desktop/camera_test/camera_log.txt',
@@ -34,9 +36,18 @@ def capture_and_resize(output_size=(1024, 768)):
             img_resized = img.resize(output_size)
         
             # 파일 저장
-            img_root = "/home/ldh/Desktop/camera_test/photos/"
-            resized_filename = f"resized_{time.strftime('%Y%m%d_%H%M%S')}.jpg"
-            img_resized.save(os.path.join(img_root, resized_filename))
+            file_path = os.path.dirname(os.path.abspath(__file__))
+            img_root = os.path.join(file_path, 'photos')
+
+            # 사진을 저장할 폴더(날짜)가 없을 경우 생성
+            if time.strftime('%Y%m%d') not in os.listdir(img_root):
+                save_path = os.path.join(img_root, time.strftime('%Y%m%d'))
+                os.mkdir(save_path)
+            else:
+                save_path = os.path.join(img_root, time.strftime('%Y%m%d'))
+
+            resized_filename = f"test_img_{time.strftime('%Y%m%d_%H%M%S')}.jpg"
+            img_resized.save(os.path.join(save_path, resized_filename))
         
         logging.info(f"사진 저장 완료: {resized_filename}")
     
@@ -49,8 +60,8 @@ def capture_and_resize(output_size=(1024, 768)):
         del full_img
         gc.collect()
 
-# 정각을 기준으로 10분마다 사진 촬영 스케줄링
-for minute in range(0, 60, 2):      # !test로 2분 간격으로 설정
+# 정각을 기준으로 30분마다 사진 촬영 스케줄링
+for minute in range(0, 60, 30):
     schedule.every().hour.at(f":{minute:02d}").do(capture_and_resize)
 
 # CPU 사용 최적을 위한 scheduler 실행 함수
