@@ -19,7 +19,7 @@ logging.getLogger('picamera2').setLevel(logging.ERROR)
 camera = Picamera2()
 
 # 사진을 캡처 후 크기 조정
-def capture_and_resize(output_size=(1024, 768)):
+def capture_and_resize(output_size=(1024, 768), change_size=False):
     try:
         # 전체 해상도로 카메라 구성 및 시작
         config = camera.create_still_configuration()
@@ -31,23 +31,26 @@ def capture_and_resize(output_size=(1024, 768)):
         # 이미지 캡처
         full_img = camera.capture_array()
         
-        # NumPy 배열을 PIL Image로 변환 및 해상도 조정
-        with Image.fromarray(full_img) as img:
-            img_resized = img.resize(output_size)
+        if change_size:
+            # NumPy 배열을 PIL Image로 변환 및 해상도 조정
+            with Image.fromarray(full_img) as img:
+                img_resized = img.resize(output_size)
+        else:
+            img_resized = Image.fromarray(full_img)
         
-            # 파일 저장
-            file_path = os.path.dirname(os.path.abspath(__file__))
-            img_root = os.path.join(file_path, 'photos')
+        # 파일 저장
+        file_path = os.path.dirname(os.path.abspath(__file__))
+        img_root = os.path.join(file_path, 'photos')
 
-            # 사진을 저장할 폴더(날짜)가 없을 경우 생성
-            if time.strftime('%Y%m%d') not in os.listdir(img_root):
-                save_path = os.path.join(img_root, time.strftime('%Y%m%d'))
-                os.mkdir(save_path)
-            else:
-                save_path = os.path.join(img_root, time.strftime('%Y%m%d'))
+        # 사진을 저장할 폴더(날짜)가 없을 경우 생성
+        if time.strftime('%Y%m%d') not in os.listdir(img_root):
+            save_path = os.path.join(img_root, time.strftime('%Y%m%d'))
+            os.mkdir(save_path)
+        else:
+            save_path = os.path.join(img_root, time.strftime('%Y%m%d'))
 
-            resized_filename = f"test_img_{time.strftime('%Y%m%d_%H%M%S')}.jpg"
-            img_resized.save(os.path.join(save_path, resized_filename))
+        resized_filename = f"test_img_{time.strftime('%Y%m%d_%H%M%S')}.jpg"
+        img_resized.save(os.path.join(save_path, resized_filename))
         
         logging.info(f"사진 저장 완료: {resized_filename}")
     
