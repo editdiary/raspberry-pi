@@ -1,0 +1,31 @@
+### JupyterNotebooks ###
+# gitignore template for Jupyter Notebooks
+
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+.pkl
+*.pkl
+
+# __pycache__
+*/__pycache__/*
+__pycache__
+
+# .pth files
+*.pth
+.pth
+
+# .zip files
+*.zip
+.zip
+
+# image files
+*.png
+*.jpg
+*.jpeg
+.png
+.jpg
+.jpeg
+
+# config
+config.py
