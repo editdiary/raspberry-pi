@@ -1,10 +1,11 @@
 from rpi_def import capture_save, run_scheduler
+from rpi_def.config import Config
 from picamera2 import Picamera2
 import schedule
 import logging
 
 # 로깅 설정
-logging.basicConfig(filename='/YOUR_SAVE_PATH/camera_log.txt',
+logging.basicConfig(filename=Config.PHOTO_SAVE_PATH+'camera_log.txt',
                     level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # Picamera2의 로그 레벨을 ERROR로 설정하여 불필요한 로그 제거

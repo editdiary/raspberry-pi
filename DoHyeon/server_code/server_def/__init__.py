@@ -3,7 +3,7 @@ import os
 from .config import Config
 
 app = Flask(__name__)
-app.config.from_object(Config)
+#app.config.from_object(Config)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -14,7 +14,7 @@ def upload_file():
     if file.filename == '':
         return "No selected file", 400
 
-    main_path = app.config['MAIN_PATH']
+    main_path = Config.MAIN_PATH
 
     save_path = os.path.join(main_path, 'photos/')
     if 'photos' not in os.listdir(main_path):
