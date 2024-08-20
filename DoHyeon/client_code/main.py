@@ -1,8 +1,8 @@
-from rpi_def import capture_save, run_scheduler
-from rpi_def.config import Config
-from picamera2 import Picamera2
-import schedule
 import logging
+import schedule
+from config import Config
+from picamera2 import Picamera2
+from client_def import capture_save, run_scheduler
 
 # 로깅 설정
 logging.basicConfig(filename=Config.PHOTO_SAVE_PATH+'camera_log.txt',
@@ -11,6 +11,7 @@ logging.basicConfig(filename=Config.PHOTO_SAVE_PATH+'camera_log.txt',
 # Picamera2의 로그 레벨을 ERROR로 설정하여 불필요한 로그 제거
 logging.getLogger('picamera2').setLevel(logging.ERROR)
 
+# 카메라 세팅
 cam = Picamera2()
 config = cam.create_still_configuration()
 cam.configure(config)
