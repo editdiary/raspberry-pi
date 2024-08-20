@@ -2,20 +2,28 @@ import os
 import time
 from config import Config
 from flask import Flask, request
+from detect_model import _detect_objects
 
 app = Flask(__name__)
 #app.config.from_object(Config)
 
 @app.route('/upload', methods=['POST'])
-def upload_file():
+def img_processing():
+    # 전송된 이미지가 없을 경우 에러 메시지 반환
     if 'image' not in request.files:
         return "No file part", 400
 
     file = request.files['image']
+
+    # 이미지는 전송되었지만 파일 이름이 없을 경우 에러 메시지 반환
     if file.filename == '':
         return "No selected file", 400
-    
-    _img_save(file, Config.MAIN_PATH)
+
+    # 이미지 저장
+    save_path = _img_save(file, Config.MAIN_PATH)
+
+    # !객체 탐지(Object detection) - 구현 필요
+    detection_result = _detect_objects(save_path)
 
     return "File successfully uploaded", 200
 
@@ -29,5 +37,8 @@ def _img_save(img, main_path):
     save_path = os.path.join(img_folder, time.strftime('%Y%m%d'))
     if time.strftime('%Y%m%d') not in os.listdir(img_folder):
         os.mkdir(save_path)
+    
+    img_path = os.path.join(save_path, img.filename)
+    img.save(img_path)
 
-    img.save(os.path.join(save_path, img.filename))
+    return img_path
