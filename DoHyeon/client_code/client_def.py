@@ -13,7 +13,12 @@ from config import Config
 def capture_save(camera, output_size=(1024, 768), change_size=False):
     try:
         # 사진 촬영 및 크기 조정
-        img = _capture_resize(camera, output_size, change_size)
+        img = _img_capture(camera)
+
+        # change_size=True인 경우 openCV를 이용하여 이미지 크기 조정
+        if change_size:
+            img = cv.cvtColor(img, cv.COLOR_RGB2BGR)        # OpenCV에서 사용하는 BGR 형식으로 변환
+            img = cv.resize(img, output_size)
 
         # 이미지 폴더 생성 생성 및 파일 저장
         img_path = _img_save(img, Config.PHOTO_SAVE_PATH)
@@ -25,16 +30,13 @@ def capture_save(camera, output_size=(1024, 768), change_size=False):
     except Exception as e:
         logging.error(f"사진 촬영 중 오류 발생: {e}")
 
-def _capture_resize(camera, output_size, change_size):
+def _img_capture(camera):
     # 전체 해상도로 카메라 구성 및 시작
     camera.start()
     time.sleep(2)       # 카메라 초기화 대기
 
-    img = camera.capture_image()        # 이미지 캡처
-
-    # change_size=True인 경우 openCV를 이용하여 이미지 크기 조정
-    if change_size:
-        img = cv.resize(img, output_size)
+    img = camera.capture_array()    # 이미지 캡처(resize를 위해 numpy 배열로 저장)
+    #img = cv.flip(img, 0)           # 이미지 상하반전
     
     camera.stop()
 
@@ -52,7 +54,7 @@ def _img_save(img, main_path):
         os.mkdir(save_path)
 
     img_name = f"rsp_{time.strftime('%Y%m%d_%H%M%S')}.jpg"
-    img.save(os.path.join(save_path, img_name))
+    cv.imwrite(os.path.join(save_path, img_name), img)
 
     return os.path.join(save_path, img_name)
 
