@@ -29,3 +29,6 @@ __pycache__
 
 # config
 config.py
+
+# .weights(DL model weights)
+*.weights
