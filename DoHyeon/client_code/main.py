@@ -18,7 +18,7 @@ cam.configure(config)
 
 # 정각을 기준으로 30분마다 사진 촬영 스케줄링
 for minute in range(0, 60, 30):
-    schedule.every().hour.at(f":{minute:02d}").do(lambda: capture_save(camera=cam))
+    schedule.every().hour.at(f":{minute:02d}").do(lambda: capture_save(camera=cam, change_size=True))
 
 # 메인 루프 실행
 if __name__ == "__main__":
