@@ -19,12 +19,34 @@ def detect_objects(img_path, min_confidence=0.4):
     object_count = {}
     for i in range(len(res)):
         object_name = class_names[res[i][-1]]
+        print(object_name)
         if object_name in object_count:
             object_count[object_name] += 1
         else:
             object_count[object_name] = 1
+    
+    print(object_count)
 
-    return object_count
+    #return object_count
+
+    #![필요시 코드 추가]
+    # 객체 탐지 결과 bounding box 및 label 표시 + GUI로 표시
+    np.random.seed(42)
+    colors = np.random.uniform(0, 255, size=(len(class_names), 3))  # 클래스별 색상 랜덤 생성
+
+    for i in range(len(res)):
+        x1, y1, x2, y2, confidence, id = res[i]
+        label = f"{class_names[id]}:{confidence:.2f}"
+        cv.rectangle(img, (x1, y1), (x2, y2), colors[id], 2)
+        cv.putText(img, label, (x1, y1-5), cv.FONT_HERSHEY_PLAIN, 1.5, colors[id], 2)
+
+    text = f"Number of objects: {len(res)}"
+    cv.putText(img, text, (30, 30), cv.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+
+    cv.imshow("YOLOv3-spp", img)
+
+    cv.waitKey()
+    cv.destroyAllWindows()
 
 # YOLO 모델 생성
 def _construct_yolo_v3():
@@ -76,3 +98,6 @@ def _yolo_detect(img, yolo_model, output_layers, min_confidence):
     indexes = cv.dnn.NMSBoxes(box, conf, min_confidence, 0.4)
     objects = [box[i]+[conf[i]]+[id[i]] for i in range(len(box)) if i in indexes]
     return objects
+
+
+detect_objects("imgs/test3.jpg")

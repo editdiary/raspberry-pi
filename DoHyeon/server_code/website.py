@@ -1,8 +1,7 @@
-import os
-import time
 from config import Config
 from flask import Flask, request
-from detect_model import _detect_objects
+from detect_model import detect_objects
+from save_def import img_save, save_detection_to_csv
 
 app = Flask(__name__)
 #app.config.from_object(Config)
@@ -20,25 +19,13 @@ def img_processing():
         return "No selected file", 400
 
     # 이미지 저장
-    save_path = _img_save(file, Config.MAIN_PATH)
+    img_name, img_path = img_save(file, Config.MAIN_PATH)
 
-    # !객체 탐지(Object detection) - 구현 필요
-    detection_result = _detect_objects(save_path)
+    # 객체 탐지(Object detection) - Class별 객체 수 반환(dictionary 형태)
+    detection_result = detect_objects(img_path, min_confidence=0.4)
+
+    # 객체 탐지 결과를 CSV 파일로 저장
+    csv_path = Config.MAIN_PATH + "detection_result.csv"
+    save_detection_to_csv(img_name, detection_result, csv_path)
 
     return "File successfully uploaded", 200
-
-def _img_save(img, main_path):
-    # 사진을 저장할 폴더가 없다면 생성
-    img_folder = os.path.join(main_path, 'photos')
-    if 'photos' not in os.listdir(main_path):
-        os.mkdir(img_folder)
-
-    # 사진을 날짜별 폴더에 저장(없으면 폴더 생성)
-    save_path = os.path.join(img_folder, time.strftime('%Y%m%d'))
-    if time.strftime('%Y%m%d') not in os.listdir(img_folder):
-        os.mkdir(save_path)
-    
-    img_path = os.path.join(save_path, img.filename)
-    img.save(img_path)
-
-    return img_path
