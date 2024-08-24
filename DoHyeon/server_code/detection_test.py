@@ -1,17 +1,11 @@
 import cv2 as cv
 import numpy as np
-import sys
 
 def detect_objects(img_path, min_confidence=0.4):
     model, output_layers, class_names = _construct_yolo_v3()        # YOLO 모델 생성
     
     img = cv.imread(img_path)
 
-    # !이미지 전송은 성공했으나 정상적으로 읽어오지 못했을 경우 logging
-    # !현재는 시스템 종류로 코드가 작성되어 있으나 추후 logging을 위한 코드로 변경 필요
-    # !이미지 전송에서 오류가 있었으면 라즈베리파이 쪽에서 logging이 남을 것이므로 전송이 실패한 경우는 생각하지 않는다.
-    if img is None: sys.exit("Could not read the image.")
-    
     # COCO dataset에서 동물 class만 추출
     res = _yolo_detect(img, model, output_layers, min_confidence)
 
@@ -27,9 +21,6 @@ def detect_objects(img_path, min_confidence=0.4):
     
     print(object_count)
 
-    #return object_count
-
-    #![필요시 코드 추가]
     # 객체 탐지 결과 bounding box 및 label 표시 + GUI로 표시
     np.random.seed(42)
     colors = np.random.uniform(0, 255, size=(len(class_names), 3))  # 클래스별 색상 랜덤 생성
@@ -95,9 +86,9 @@ def _yolo_detect(img, yolo_model, output_layers, min_confidence):
                 id.append(class_id)
 
     # 비최대 억제(NMS) 수행 - 겹치는 box 제거
-    indexes = cv.dnn.NMSBoxes(box, conf, min_confidence, 0.4)
+    indexes = cv.dnn.NMSBoxes(box, conf, min_confidence, 0.5)
     objects = [box[i]+[conf[i]]+[id[i]] for i in range(len(box)) if i in indexes]
     return objects
 
 
-detect_objects("imgs/test3.jpg")
+detect_objects("imgs/horse.jpg")

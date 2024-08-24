@@ -1,7 +1,7 @@
 from config import Config
 from flask import Flask, request
 from detect_model import detect_objects
-from save_def import img_save, save_detection_to_csv
+from save_def import img_save, save_detection_to_json
 
 app = Flask(__name__)
 #app.config.from_object(Config)
@@ -21,11 +21,16 @@ def img_processing():
     # 이미지 저장
     img_name, img_path = img_save(file, Config.MAIN_PATH)
 
-    # 객체 탐지(Object detection) - Class별 객체 수 반환(dictionary 형태)
-    detection_result = detect_objects(img_path, min_confidence=0.4)
+    # 객체 탐지(Object detection) - 탐지 결과(box, conf, class_id)와 객체 수 반환
+    try:
+        detection_res, object_counts = detect_objects(img_path, min_confidence=0.4)
 
-    # 객체 탐지 결과를 CSV 파일로 저장
-    csv_path = Config.MAIN_PATH + "detection_result.csv"
-    save_detection_to_csv(img_name, detection_result, csv_path)
+        # 객체 탐지 결과를 CSV 파일로 저장
+        json_path = Config.MAIN_PATH + "detection_result.json"
+        save_detection_to_json(img_name, detection_res, object_counts, json_path)
 
-    return "File successfully uploaded", 200
+        return "File successfully uploaded, detected and saved", 200
+    except ValueError as e:
+        return {str(e)}, 400
+    except Exception as e:
+        return f"An unexpected error occurred: {str(e)}", 500

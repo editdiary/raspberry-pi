@@ -1,30 +1,28 @@
 import cv2 as cv
 import numpy as np
-import sys
 
 def detect_objects(img_path, min_confidence=0.4):
     model, output_layers, class_names = _construct_yolo_v3()        # YOLO 모델 생성
     
     img = cv.imread(img_path)
 
-    # !이미지 전송은 성공했으나 정상적으로 읽어오지 못했을 경우 logging
-    # !현재는 시스템 종류로 코드가 작성되어 있으나 추후 logging을 위한 코드로 변경 필요
-    # !이미지 전송에서 오류가 있었으면 라즈베리파이 쪽에서 logging이 남을 것이므로 전송이 실패한 경우는 생각하지 않는다.
-    if img is None: sys.exit("Could not read the image.")
+    # 이미지 전송은 성공했으나 정상적으로 읽어오지 못했을 경우 에러 반환
+    if img is None:
+        raise ValueError("File is successfully uploaded, but could not read the image.")
     
     # COCO dataset에서 동물 class만 추출
-    res = _yolo_detect(img, model, output_layers, min_confidence)
+    detection_res = _yolo_detect(img, model, output_layers, min_confidence)
 
     # class별 객체 수 count
-    object_count = {}
-    for i in range(len(res)):
-        object_name = class_names[res[i][-1]]
-        if object_name in object_count:
-            object_count[object_name] += 1
+    object_counts = {}
+    for i in range(len(detection_res["class_id"])):
+        object_name = class_names[detection_res["class_id"][i]]
+        if object_name in object_counts:
+            object_counts[object_name] += 1
         else:
-            object_count[object_name] = 1
+            object_counts[object_name] = 1
 
-    return object_count
+    return detection_res, object_counts
 
 # YOLO 모델 생성
 def _construct_yolo_v3():
@@ -74,5 +72,11 @@ def _yolo_detect(img, yolo_model, output_layers, min_confidence):
 
     # 비최대 억제(NMS) 수행 - 겹치는 box 제거
     indexes = cv.dnn.NMSBoxes(box, conf, min_confidence, 0.4)
-    objects = [box[i]+[conf[i]]+[id[i]] for i in range(len(box)) if i in indexes]
-    return objects
+
+    detection_res = {
+        "bouding_box": [box[i] for i in range(len(box)) if i in indexes],
+        "confidence": [conf[i] for i in range(len(box)) if i in indexes],
+        "class_id": [int(id[i]) for i in range(len(box)) if i in indexes]
+    }
+
+    return detection_res

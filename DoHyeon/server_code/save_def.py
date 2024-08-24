@@ -1,5 +1,6 @@
 import os
 import time
+import json
 import pandas as pd
 
 # 이미지 저장 함수
@@ -20,23 +21,47 @@ def img_save(img, main_path):
     return img.filename, img_path
 
 
-# 데이터 저장 함수
-def save_detection_to_csv(img_name, detection_result, csv_file):
-    # 기존에 csv 파일이 있는지 확인
+# 데이터 저장 함수(json)
+def save_detection_to_json(img_name, detection_result, object_counts, json_file):
+    # 기존 파일이 있다면 읽어오기, 없으면 새 리스트 생성
     try:
-        df_existing = pd.read_csv(csv_file)
+        with open(json_file, 'r') as file:
+            existing_data = json.load(file)
     except FileNotFoundError:
-        df_existing = pd.DataFrame()
+        existing_data = []
 
-    # detection 결과를 df로 변환 후 기존의 파일에 합치기
-    df_detection = pd.DataFrame([{
+    # 새로운 데이터 추가
+    total_data = {
         "date": time.strftime('%Y%m%d'),
         "time": time.strftime('%H:%M:%S'),
         "file_name": img_name,
-        **detection_result
-    }])
-    df_combined = pd.concat([df_existing, df_detection], axis=0, ignore_index=True)
-    df_combined.fillna(0, inplace=True)     # NaN 값은 0으로 대체
+        "object_counts": object_counts,
+        "detection_result": detection_result
+    }
+    existing_data.append(total_data)
 
-    # csv 파일로 저장
-    df_combined.to_csv(csv_file, index=False)
+    # json 파일로 저장
+    with open(json_file, 'w') as file:
+        json.dump(existing_data, file, indent=4)
+
+
+# # 데이터 저장 함수(csv)
+# def save_detection_to_csv(img_name, detection_result, csv_file):
+#     # 기존에 csv 파일이 있는지 확인
+#     try:
+#         df_existing = pd.read_csv(csv_file)
+#     except FileNotFoundError:
+#         df_existing = pd.DataFrame()
+
+#     # detection 결과를 df로 변환 후 기존의 파일에 합치기
+#     df_detection = pd.DataFrame([{
+#         "date": time.strftime('%Y%m%d'),
+#         "time": time.strftime('%H:%M:%S'),
+#         "file_name": img_name,
+#         **detection_result
+#     }])
+#     df_combined = pd.concat([df_existing, df_detection], axis=0, ignore_index=True)
+#     df_combined.fillna(0, inplace=True)     # NaN 값은 0으로 대체
+
+#     # csv 파일로 저장
+#     df_combined.to_csv(csv_file, index=False)
