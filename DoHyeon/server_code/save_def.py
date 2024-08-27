@@ -1,7 +1,7 @@
 import os
 import time
 import json
-import pandas as pd
+import logging
 
 # 이미지 저장 함수
 def img_save(img, main_path):
@@ -17,6 +17,8 @@ def img_save(img, main_path):
     
     img_path = os.path.join(save_path, img.filename)
     img.save(img_path)
+
+    logging.info(f"File successfully saved: {img.filename}")
 
     return img.filename, img_path
 
@@ -43,6 +45,8 @@ def save_detection_to_json(img_name, detection_result, object_counts, json_file)
     # json 파일로 저장
     with open(json_file, 'w') as file:
         json.dump(existing_data, file, indent=4)
+    
+    logging.info(f"Detection result successfully saved: detection_result.json")
 
 
 # # 데이터 저장 함수(csv)

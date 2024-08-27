@@ -5,8 +5,8 @@ from picamera2 import Picamera2
 from client_def import capture_save, run_scheduler
 
 # 로깅 설정
-logging.basicConfig(filename=Config.PHOTO_SAVE_PATH+'camera_log.txt',
-                    level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(filename=Config.PHOTO_SAVE_PATH+'client.log',
+                    level=logging.INFO, format='%(asctime)s - [%(levelname)s] %(message)s')
 
 # Picamera2의 로그 레벨을 ERROR로 설정하여 불필요한 로그 제거
 logging.getLogger('picamera2').setLevel(logging.ERROR)
